@@ -109,6 +109,30 @@ export default function FacilityEditProfile({ navigation }) {
     setChecked(!checked);
   };
   
+  //------------------------------------------Phone Input----------------
+  const formatPhoneNumber = (input) => {
+    // Remove all non-numeric characters from the input
+    const cleaned = input.replace(/\D/g, '');
+
+    // Apply the desired phone number format
+    let formattedNumber = '';
+    if (cleaned.length >= 3) {
+      formattedNumber = `(${cleaned.slice(0, 3)})`;
+    }
+    if (cleaned.length > 3) {
+      formattedNumber += ` ${cleaned.slice(3, 6)}`;
+    }
+    if (cleaned.length > 6) {
+      formattedNumber += `-${cleaned.slice(6, 10)}`;
+    }
+
+    return formattedNumber;
+  };
+  const handlePhoneNumberChange = (text) => {
+    const formattedNumber = formatPhoneNumber(text);
+    handleCredentials('contactPhone', formattedNumber);
+  };
+
   const handleSignUpNavigate = () => {
     navigation.navigate('ClientPending');
   }
@@ -217,15 +241,12 @@ export default function FacilityEditProfile({ navigation }) {
             <View style={styles.email}>
               <Text style={styles.subtitle}> Contact Phone <Text style={{color: 'red'}}>*</Text> </Text>
               <View style={{flexDirection: 'row', width: '100%', gap: 5}}>
-                <PhoneInput
-                  style={[styles.input, {backgroundColor: 'white', width: '100%', paddingLeft: 5}]}
-                  placeholder=""
-                  initialCountry="us"
-                  defaultValue={credentials.contactPhone}
-                  onChangePhoneNumber={e => handleCredentials('contactPhone', e)}
-                  // value={credentials.phoneNumber}
-                  textProps={{ style: { color: 'black', fontSize: 16, padding: 0} }}
-                  keyboardType="phone-pad"                            
+                <TextInput
+                  value={credentials.contactPhone}
+                  style={[styles.input, {width: '100%'}]}
+                  onChangeText={handlePhoneNumberChange}
+                  keyboardType="phone-pad"
+                  placeholder={credentials.contactPhone}
                 />
               </View>
             </View>

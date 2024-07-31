@@ -50,7 +50,7 @@ export default function AdminHome ({ navigation }) {
             translucent backgroundColor="transparent"
         />
         <MHeader navigation={navigation} />
-        <SubNavbar navigation={navigation}/>
+        <SubNavbar navigation={navigation} name={"AdminLogin"}/>
         <ScrollView style={{width: '100%', marginTop: 119}}
           showsVerticalScrollIndicator={false}
         >

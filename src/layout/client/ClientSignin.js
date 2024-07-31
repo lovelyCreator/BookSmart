@@ -1,5 +1,5 @@
 import { StyleSheet, View, Alert, Text, ScrollView, TouchableOpacity, Pressable, Image, StatusBar } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CheckBox } from 'react-native-elements';
 import images from '../../assets/images';
 import { Divider, TextInput, ActivityIndicator, useTheme, Card } from 'react-native-paper';
@@ -11,6 +11,7 @@ import MFooter from '../../components/Mfooter';
 import { useAtom } from 'jotai';
 import { firstNameAtom, lastNameAtom, birthdayAtom, phoneNumberAtom, signatureAtom, titleAtom, emailAtom, photoImageAtom, userRoleAtom } from '../../context/ClinicalAuthProvider'
 import { Signin } from '../../utils/useApi';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ClientSignIn({ navigation }) {  
   const [firstName, setFirstName] = useAtom(firstNameAtom);
@@ -31,7 +32,6 @@ export default function ClientSignIn({ navigation }) {
     password: '',
     userRole: 'Clinicians',
   })
-  const [showPassword, setShowPassword] = useState(false);
   const [checked, setChecked] = useState(false);
 
   //Alert
@@ -51,9 +51,18 @@ export default function ClientSignIn({ navigation }) {
     );
   };
   
-  const handleToggle = () => {
+  const handleToggle = async () => {
     setChecked(!checked);
   };
+
+  useEffect(() => {
+    const getCredentials = async() => {
+      const emails = (await AsyncStorage.getItem('clinicalEmail')) || '';
+      const password = (await AsyncStorage.getItem('clinicalPassword')) || '';
+      setCredentials({...credentials, email: emails, password: password});
+    }
+    getCredentials();
+  }, [])
 
   const handleCredentials = (target, e) => {
     setCredentials({...credentials, [target]: e});
@@ -78,6 +87,7 @@ export default function ClientSignIn({ navigation }) {
 
   const handleSubmit = async () => {
     try {
+      console.log('credentials:', credentials)
       const response = await Signin(credentials, 'clinical');
       console.log('SignIn Successful: ', response.user);
       setFirstName(response.user.firstName);
@@ -89,7 +99,12 @@ export default function ClientSignIn({ navigation }) {
       setTitle(response.user.title);
       setPhotoImage(response.user.photoImage);
       setUserRole(response.user.userRole);
+      if (checked) {
+        await AsyncStorage.setItem('clinicalEmail', credentials.email);
+        await AsyncStorage.setItem('clinicalPassword', credentials.password);
+      }
       handleSignInNavigate();
+      // console.log('email:', storage)
     } catch (error) {
       console.log('SignIn failed: ', error)
     }

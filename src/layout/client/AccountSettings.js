@@ -84,7 +84,7 @@ export default function AccountSettings ({ navigation }) {
           translucent backgroundColor="transparent"
         />
         <MHeader navigation={navigation} />
-        <SubNavbar navigation={navigation} />
+        <SubNavbar navigation={navigation} name={"ClientSignIn"} />
         <ScrollView style={{width: '100%', marginTop: 139}}
           showsVerticalScrollIndicator={false}
         >

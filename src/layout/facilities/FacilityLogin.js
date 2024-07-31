@@ -1,5 +1,5 @@
 import { StyleSheet, View, Alert, Text, ScrollView, TouchableOpacity, Pressable, Image, StatusBar } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CheckBox } from 'react-native-elements';
 import images from '../../assets/images';
 import { Divider, TextInput, ActivityIndicator, useTheme, Card } from 'react-native-paper';
@@ -11,6 +11,7 @@ import MFooter from '../../components/Mfooter';
 import { useAtom } from 'jotai';
 import { firstNameAtom, lastNameAtom, facilityAcknowledgementAtom, companyNameAtom, contactPhoneAtom, contactPasswordAtom, entryDateAtom, addressAtom,  contactEmailAtom, avatarAtom, userRoleAtom, passwordAtom } from '../../context/FacilityAuthProvider'
 import { Signin } from '../../utils/useApi';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function FacilityLogin({ navigation }) {  
   const [firstName, setFirstName] = useAtom(firstNameAtom);
@@ -34,8 +35,16 @@ export default function FacilityLogin({ navigation }) {
     password: '',
     userRole: 'Facilities',
   })
-  const [showPassword, setShowPassword] = useState(false);
   const [checked, setChecked] = useState(false);
+
+  useEffect(() => {
+    const getCredentials = async() => {
+      const emails = (await AsyncStorage.getItem('facilityEmail')) || '';
+      const password = (await AsyncStorage.getItem('facilityPassword')) || '';
+      setCredentials({...credentials, contactEmail: emails, password: password});
+    }
+    getCredentials();
+  }, [])
 
   //Alert
   const showAlert = (name) => {
@@ -64,7 +73,7 @@ export default function FacilityLogin({ navigation }) {
   }
 
   const handleSignInNavigate = () => {
-    if (credentials.email === '') {
+    if (credentials.contactEmail === '') {
       showAlert('email')
     }
     else if (credentials.password === '') {
@@ -94,6 +103,10 @@ export default function FacilityLogin({ navigation }) {
       setAvatar(response.user.avatar);
       setUserRole(response.user.userRole);
       setFacilityAcknowledgement(response.user.facilityAcknowledgeTerm)
+      if (checked) {
+        await AsyncStorage.setItem('facilityEmail', credentials.contactEmail);
+        await AsyncStorage.setItem('facilityPassword', credentials.password);
+      }
       if (response.user.facilityAcknowledgeTerm) {
         navigation.navigate("FacilityProfile");
       } else {

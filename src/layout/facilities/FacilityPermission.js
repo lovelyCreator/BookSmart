@@ -53,18 +53,6 @@ export default function FacilityPermission ({ navigation }) {
     // handleCredentials('signature', result)
     setCredentials({...credentials, ["signature"] :result.encoded})
   }
-  const handleSaveImage = async () => {
-    // result.encoded - the base64 encoded image data
-    // console.log(result);
-    console.log(signatureRef)
-    const savedImage = await signatureRef.current.saveImage(); // Save the image and capture the result
-
-    // Convert the saved image to Base64
-    const base64Image = `data:image/png;base64,${savedImage.encoded}`; // Convert to Base64 format
-    // handleCredentials('signature', base64Image)
-    setSignature(base64Image)
-    console.log(base64Image); // Log or use t
-  };
 
   const handleUploadSubmit = async () => {
     console.log('submit')
@@ -72,7 +60,8 @@ export default function FacilityPermission ({ navigation }) {
       // setCredentials(...credentials, {signature: signature, facilityAcknowledgeTerm: facilityAcknowledgement});
       console.log("--------------------------", credentials)
       const response = await Update(credentials, 'facilities');
-     
+      console.log(response.user)
+      setFacilityAcknowledgement(response.user.facilityAcknowledgeTerm)
       navigation.navigate("FacilityProfile")
       console.log(response)
     } catch (error) {
@@ -87,7 +76,7 @@ export default function FacilityPermission ({ navigation }) {
             translucent backgroundColor="transparent"
         />
         <MHeader navigation={navigation} />
-        <SubNavbar navigation={navigation} />
+        <SubNavbar navigation={navigation} name={"FacilityLogin"} />
         <ScrollView style={{width: '100%', marginTop: 140}}
           showsVerticalScrollIndicator={false}
         >

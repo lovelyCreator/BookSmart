@@ -1,5 +1,5 @@
 import { StyleSheet, View, Alert, Text, ScrollView, TouchableOpacity, Pressable, Image, StatusBar } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CheckBox } from 'react-native-elements';
 import images from '../../assets/images';
 import { Divider, TextInput, ActivityIndicator, useTheme, Card } from 'react-native-paper';
@@ -11,6 +11,7 @@ import MFooter from '../../components/Mfooter';
 import { useAtom } from 'jotai';
 import { firstNameAtom, lastNameAtom, birthdayAtom, phoneNumberAtom, signatureAtom, titleAtom, emailAtom, photoImageAtom, userRoleAtom } from '../../context/ClinicalAuthProvider'
 import { Signin } from '../../utils/useApi';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function AdminLogin({ navigation }) {  
   const [firstName, setFirstName] = useAtom(firstNameAtom);
@@ -29,9 +30,18 @@ export default function AdminLogin({ navigation }) {
   const [ credentials, setCredentials ] = useState({
     email: '',
     password: '',
-    userRole: 'Clinicians',
+    userRole: 'Admin',
   })
-  const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    const getCredentials = async() => {
+      const emails = (await AsyncStorage.getItem('AdminEmail')) || '';
+      const password = (await AsyncStorage.getItem('AdminPassword')) || '';
+      setCredentials({...credentials, email: emails, password: password});
+    }
+    getCredentials();
+  }, []);
+
   const [checked, setChecked] = useState(false);
 
   //Alert
@@ -69,7 +79,7 @@ export default function AdminLogin({ navigation }) {
     }
     else {
       // const response = 
-      // navigation.navigate('AdminHome');
+      navigation.navigate('AdminHome');
     }
   }
 
@@ -81,14 +91,18 @@ export default function AdminLogin({ navigation }) {
     try {
       const response = await Signin(credentials, 'Admin');
       console.log('SignIn Successful: ', response);
-      setFirstName(response.data.firstName);
-      setLastName(response.data.lastName);
-      setBirthday(response.data.birthday);
-      setPhoneNumber(response.data.phoneNumber);
-      setSignature(response.data.signature);
-      setEmail(response.data.email);
-      setTitle(response.data.title);
-      setPhotoImage(response.data.photoImage);
+      // setFirstName(response.data.firstName);
+      // setLastName(response.data.lastName);
+      // setBirthday(response.data.birthday);
+      // setPhoneNumber(response.data.phoneNumber);
+      // setSignature(response.data.signature);
+      setEmail(response.user.email);
+      // setTitle(response.data.title);
+      // setPhotoImage(response.data.photoImage);
+      if (checked) {
+        await AsyncStorage.setItem('AdminEmail', credentials.email);
+        await AsyncStorage.setItem('AdminPassword', credentials.password);
+      }
       handleSignInNavigate();
     } catch (error) {
       console.log('SignIn failed: ', error)
@@ -165,8 +179,8 @@ export default function AdminLogin({ navigation }) {
             </View>
             <View style={styles.btn}>
               <HButton style={styles.subBtn} onPress={ 
-                // handleSubmit 
-                handleSignInNavigate
+                handleSubmit 
+                // handleSignInNavigate
               }>
                 Sign In
               </HButton>
